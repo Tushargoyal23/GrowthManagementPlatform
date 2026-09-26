@@ -8,7 +8,7 @@ The product is designed for a coaching class with one head teacher and a small g
 
 GMP helps the head teacher:
 
-- Track daily attendance by subject and batch
+- Track daily attendance by batch
 - Monitor academic performance over time
 - Identify students at risk using attendance and marks trends
 - Manage fees and reminders
@@ -31,7 +31,7 @@ GMP helps the head teacher:
 ## Key features
 
 ### Overview dashboard
-- Today's attendance summary by subject
+- Today's attendance summary
 - Batch-wise analysis and weak-subject summaries
 - Red-flag students list
 - Notice board for tests and holidays
@@ -44,7 +44,7 @@ GMP helps the head teacher:
 - Link to parent contact and progress communication
 
 ### Tests and marks
-- Create tests with subject, chapter, date, batch, and max marks
+- Create tests with date, batch, and max marks; each question tags a topic (topic → chapter → subject)
 - Track test status: upcoming, pending, or completed
 - View batch averages, rankings, and result summaries
 - Generate question papers with AI assistance
@@ -69,7 +69,7 @@ GMP helps the head teacher:
   - attendance below 80%
 - Trend status is based on the latest overall average versus the previous test
 - Pass mark is assumed to be 40%
-- Attendance is tracked per subject session and rolled up into daily summaries
+- Attendance is marked once per student per day (present, late, or absent)
 - Students should never see classmates' names or marks
 - Personal data must be handled with privacy safeguards, including consent and secure storage
 
@@ -84,7 +84,6 @@ The system is designed for multi-tenant usage from the beginning and stores data
 - Subject
 - Chapter
 - Topic
-- Session
 - Attendance records
 - Test details
 - Questions and answers
@@ -115,7 +114,7 @@ The requirements suggest the following stack:
 
 - Frontend: React or Next.js
 - Mobile-friendly web app with PWA support
-- Backend: Node.js or Python with FastAPI
+- Backend: Python with FastAPI
 - Database: PostgreSQL
 - Analytics: SQL and Python with pandas for averages, trends, and topic-scoring logic
 - AI: LLM API called from the backend only
@@ -196,7 +195,9 @@ Several product decisions are still open, including:
 GMP/
 ├── src/
 │   ├── GMP-Requirements.pdf
-│   └── README.md
+│   ├── README.md
+│   └── services/
+│       └── __init__.py
 ├── .venv/
 └── .git/
 ```
