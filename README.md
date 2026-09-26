@@ -1,12 +1,12 @@
-# ClassLedger
+# Growth Management Platform
 
-ClassLedger is a student and teacher management tool for a small coaching class. It helps track attendance, marks, fees, and topic-wise performance, while surfacing students who need attention.
+GMP is a student and teacher management tool for a small coaching class. It helps track attendance, marks, fees, and topic-wise performance, while surfacing students who need attention.
 
 The product is designed for a coaching class with one head teacher and a small group of students, and it focuses on operational clarity rather than content delivery. It is not meant to replace an LMS; instead, it manages academic records and highlights red flags, weak topics, and student progress.
 
 ## Product goal
 
-ClassLedger helps the head teacher:
+GMP helps the head teacher:
 
 - Track daily attendance by subject and batch
 - Monitor academic performance over time
@@ -195,7 +195,7 @@ Several product decisions are still open, including:
 ```text
 GMP/
 ├── src/
-│   ├── ClassLedger-Requirements.pdf
+│   ├── GMP-Requirements.pdf
 │   └── README.md
 ├── .venv/
 └── .git/
@@ -230,7 +230,7 @@ flowchart LR
 ## Getting started
 
 1. Open this repository in VS Code.
-2. Review the requirements in [src/ClassLedger-Requirements.pdf](src/ClassLedger-Requirements.pdf).
+2. Review the requirements in [src/GMP-Requirements.pdf](src/GMP-Requirements.pdf).
 3. Use this README as the product baseline for planning implementation and features.
 4. Build the application in phases, beginning with authentication, database setup, attendance, and test creation.
 
@@ -243,4 +243,4 @@ flowchart LR
 
 ## Summary
 
-ClassLedger is a focused academic operations system for a coaching class. Its strongest value is turning daily attendance, marks, and fee data into actionable insight for the head teacher, while keeping the system fast, explainable, and safe for student data.
+GMP is a focused academic operations system for a coaching class. Its strongest value is turning daily attendance, marks, and fee data into actionable insight for the head teacher, while keeping the system fast, explainable, and safe for student data.
