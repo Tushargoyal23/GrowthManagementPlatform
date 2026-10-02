@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ClassLedger</title>
+<style>
+:root{
+  --bg:#ffffff; --surface:#ffffff; --surface-muted:#f6f6f4; --border:#e6e4dd;
+  --text:#1a1a18; --text-2:#6b6a63; --text-3:#9a988f;
+  --accent:#185fa5; --accent-bg:#e6f1fb; --accent-strong:#0c447c;
+  --danger:#a32d2d; --danger-bg:#fcebeb;
+  --success:#3b6d11; --success-bg:#eaf3de;
+  --warn:#9a6b12; --warn-bg:#fbf1de;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#171716; --surface:#1f1f1e; --surface-muted:#242423; --border:#333230;
+  --text:#f0efe9; --text-2:#b3b1a8; --text-3:#7d7b73;
+  --accent:#5da4e0; --accent-bg:#0c2a3e; --accent-strong:#8fc4ee;
+  --danger:#e08787; --danger-bg:#3a1f1f; --success:#93c15b; --success-bg:#20301a;
+  --warn:#e0b85d; --warn-bg:#362a10;
+}}
+:root[data-theme="dark"]{
+  --bg:#171716; --surface:#1f1f1e; --surface-muted:#242423; --border:#333230;
+  --text:#f0efe9; --text-2:#b3b1a8; --text-3:#7d7b73;
+  --accent:#5da4e0; --accent-bg:#0c2a3e; --accent-strong:#8fc4ee;
+  --danger:#e08787; --danger-bg:#3a1f1f; --success:#93c15b; --success-bg:#20301a;
+  --warn:#e0b85d; --warn-bg:#362a10;
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+a{color:var(--accent);text-decoration:none;}
+button,input,select{font-family:inherit;}
+input,select{padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13.5px;width:100%;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th{text-align:left;font-size:12px;color:var(--text-3);padding:8px 10px;border-bottom:1px solid var(--border);font-weight:500;}
+td{padding:11px 10px;border-bottom:1px solid var(--border);}
+tr:last-child td{border-bottom:none;}
+tr.clickable{cursor:pointer;}
+tr.clickable:hover{background:var(--surface-muted);}
+
+.navbar{position:sticky;top:0;z-index:10;padding-top:env(safe-area-inset-top,0px);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:14px 20px;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand .logo{width:34px;height:34px;border-radius:9px;background:var(--accent-bg);display:flex;align-items:center;justify-content:center;color:var(--accent-strong);font-weight:700;font-size:15px;}
+.brand .name{font-weight:600;font-size:16px;}
+.tabs{display:flex;gap:4px;background:var(--surface-muted);border-radius:10px;padding:4px;}
+.tab{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;border:none;background:transparent;}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.06);}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.ai-btn{width:38px;height:38px;border-radius:50%;border:none;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--surface-muted);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text-2);}
+
+.wrap{max-width:960px;margin:0 auto;padding:28px 20px 60px;}
+.view{display:none;}
+.view.active{display:block;}
+
+.pagehead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.pagehead h1{font-size:21px;font-weight:600;margin:0;}
+.btn{padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn:hover{background:var(--surface-muted);}
+.btn.primary:hover{opacity:.9;}
+
+.search-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.search-row input{flex:1;min-width:160px;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.section-title{font-size:14px;font-weight:600;margin:26px 0 12px;}
+.tag{display:inline-block;font-size:11.5px;padding:3px 9px;border-radius:20px;}
+.tag.good{background:var(--success-bg);color:var(--success);}
+.tag.warn{background:var(--warn-bg);color:var(--warn);}
+.tag.bad{background:var(--danger-bg);color:var(--danger);}
+.tag.neutral{background:var(--accent-bg);color:var(--accent-strong);}
+
+/* Profile */
+.profile-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:18px;}
+.profile-head .who{display:flex;gap:14px;align-items:center;}
+.profile-head .avatar-lg{width:52px;height:52px;border-radius:50%;background:var(--accent-bg);color:var(--accent-strong);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:17px;}
+.profile-head h2{margin:0;font-size:18px;font-weight:600;}
+.profile-head p{margin:2px 0 0;font-size:13px;color:var(--text-2);}
+.profile-actions{display:flex;gap:8px;}
+.tile-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.tile{background:var(--surface-muted);border-radius:12px;padding:14px;}
+.tile .num{font-size:19px;font-weight:600;margin:0;}
+.tile .lbl{font-size:12px;color:var(--text-2);margin:3px 0 0;}
+.subject-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.subject-card h4{margin:0 0 8px;font-size:14px;font-weight:600;}
+.subject-card .row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-2);padding:4px 0;}
+.subject-card .row b{color:var(--text);font-weight:500;}
+.chapter-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.chapter-row:last-child{border-bottom:none;}
+.bar{width:90px;height:6px;border-radius:4px;background:var(--border);overflow:hidden;display:inline-block;margin-left:8px;}
+.bar span{display:block;height:100%;background:var(--accent);}
+
+/* Create test */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-grid label{font-size:12.5px;color:var(--text-2);display:block;margin-bottom:5px;}
+.ai-box{margin-top:22px;border:1px dashed var(--border);border-radius:12px;padding:16px;}
+.qcard{background:var(--surface-muted);border-radius:10px;padding:12px 14px;margin-top:10px;}
+.qcard .qtop{display:flex;justify-content:space-between;font-size:12px;color:var(--text-3);margin-bottom:6px;}
+.qcard p.qtext{margin:0 0 4px;font-size:13.5px;}
+.qcard .qmeta{font-size:12px;color:var(--text-2);}
+
+/* Fees */
+.fee-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+
+@media (max-width:680px){
+  .tabs{display:none;}
+  .tile-grid,.subject-grid{grid-template-columns:repeat(2,1fr);}
+  .form-grid,.fee-tiles{grid-template-columns:1fr;}
+  table{font-size:12.5px;}
+}
+</style>
+</head>
+<body>
+
+<div class="navbar" id="navbar" style="display:none;">
+  <div class="brand"><div class="logo">CL</div><div class="name">ClassLedger</div></div>
+  <div class="tabs">
+    <button class="tab active" data-view="overview" onclick="showView('overview',this)">Overview</button>
+    <button class="tab" data-view="students" onclick="showView('students',this)">Students</button>
+    <button class="tab" data-view="tests" onclick="showView('tests',this)">Tests</button>
+    <button class="tab" data-view="fees" onclick="showView('fees',this)">Fees</button>
+  </div>
+  <div class="nav-right">
+    <button class="ai-btn" title="Ask AI assistant">✦</button>
+    <div class="avatar" onclick="logout()" style="cursor:pointer;" title="Log out">RS</div>
+  </div>
+</div>
+
+<div class="wrap" id="wrap">
+
+  <!-- LOGIN -->
+  <div class="view active" id="view-login" style="max-width:380px;margin:40px auto 0;">
+    <div class="card" style="padding:2rem 1.75rem;">
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div class="logo" style="width:48px;height:48px;border-radius:12px;margin:0 auto 12px;font-size:17px;">CL</div>
+        <p style="font-size:18px;font-weight:600;margin:0;">ClassLedger</p>
+        <p style="font-size:13px;color:var(--text-2);margin:4px 0 0;">Sign in to your account</p>
+      </div>
+
+      <div style="display:flex;background:var(--surface-muted);border-radius:10px;padding:3px;margin-bottom:1.5rem;">
+        <button id="tab-institute" onclick="switchLoginTab('institute')" style="flex:1;border:none;background:var(--surface);border-radius:8px;padding:8px 0;font-size:13px;font-weight:500;cursor:pointer;">Institute</button>
+        <button id="tab-student" onclick="switchLoginTab('student')" style="flex:1;border:none;background:transparent;border-radius:8px;padding:8px 0;font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;">Student</button>
+      </div>
+
+      <div id="panel-institute">
+        <label style="font-size:13px;color:var(--text-2);display:block;margin-bottom:4px;">Email</label>
+        <input id="inst-email" type="email" placeholder="headteacher@institute.com" style="margin-bottom:14px;"/>
+        <label style="font-size:13px;color:var(--text-2);display:block;margin-bottom:4px;">Password</label>
+        <input id="inst-pass" type="password" placeholder="Enter password" style="margin-bottom:6px;"/>
+        <p id="inst-error" style="font-size:12.5px;color:var(--danger);margin:4px 0 0;display:none;">Enter email and password.</p>
+      </div>
+
+      <div id="panel-student" style="display:none;">
+        <label style="font-size:13px;color:var(--text-2);display:block;margin-bottom:4px;">Roll number or phone</label>
+        <input id="stu-id" type="text" placeholder="e.g. 24-018 or 98xxxxxxx0" style="margin-bottom:14px;"/>
+        <label style="font-size:13px;color:var(--text-2);display:block;margin-bottom:4px;">Password</label>
+        <input id="stu-pass" type="password" placeholder="Enter password" style="margin-bottom:6px;"/>
+        <p id="stu-error" style="font-size:12.5px;color:var(--danger);margin:4px 0 0;display:none;">Enter your roll number and password.</p>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 18px;">
+        <label style="font-size:12.5px;color:var(--text-2);display:flex;align-items:center;gap:6px;"><input type="checkbox" style="width:auto;"/> Remember me</label>
+        <a href="#" style="font-size:12.5px;">Forgot password</a>
+      </div>
+
+      <button class="btn primary" style="width:100%;" onclick="doLogin()">Sign in</button>
+      <p style="text-align:center;font-size:12px;color:var(--text-3);margin-top:16px;">New institute? <a href="#">Request access</a></p>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="view" id="view-overview">
+    <p style="font-size:13px;color:var(--text-3);margin:0;">Saturday, 26 September</p>
+    <h1 style="font-size:22px;font-weight:600;margin:4px 0 8px;">Good morning, Rohan</h1>
+    <p style="font-size:14.5px;color:var(--text-2);line-height:1.6;max-width:620px;margin:0 0 20px;"><b style="color:var(--text)">86% attendance</b> so far today across <b style="color:var(--text)">4 batches</b>. Batch B2 is leading the week, two tests coming up Monday.</p>
+    <div class="card" style="display:grid;grid-template-columns:120px 1fr;gap:18px;align-items:center;margin-bottom:20px;">
+      <div style="position:relative;width:100px;height:100px;">
+        <svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="var(--border)" stroke-width="9"/><circle cx="50" cy="50" r="42" fill="none" stroke="var(--accent)" stroke-width="9" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="37" transform="rotate(-90 50 50)"/></svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><b style="font-size:18px;">86%</b><span style="font-size:10.5px;color:var(--text-3);">present</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <div><p style="font-size:19px;font-weight:600;margin:0;">4</p><p style="font-size:12px;color:var(--text-2);margin:2px 0 0;">batches</p></div>
+        <div><p style="font-size:19px;font-weight:600;margin:0;">72</p><p style="font-size:12px;color:var(--text-2);margin:2px 0 0;">students</p></div>
+        <div><p style="font-size:19px;font-weight:600;margin:0;">2/3</p><p style="font-size:12px;color:var(--text-2);margin:2px 0 0;">marked</p></div>
+      </div>
+    </div>
+    <button class="btn" style="width:100%;display:flex;justify-content:space-between;margin-bottom:10px;" onclick="var l=document.getElementById('flagList');l.style.display=l.style.display==='block'?'none':'block';">
+      <span>Students flagged for attention</span><span>3 ▾</span>
+    </button>
+    <div id="flagList" style="display:none;overflow-x:auto;white-space:nowrap;padding:6px 0 16px;">
+      <span class="card" style="display:inline-block;min-width:180px;margin-right:10px;border-color:var(--danger);"><b style="font-size:13px;">Aarav Shah</b><br><span style="font-size:12px;color:var(--text-2);">Physics dropped 3 tests</span><br><button class="btn" style="width:100%;margin-top:8px;font-size:12px;" onclick="openProfile()">View profile</button></span>
+      <span class="card" style="display:inline-block;min-width:180px;margin-right:10px;border-color:var(--danger);"><b style="font-size:13px;">Priya Mehta</b><br><span style="font-size:12px;color:var(--text-2);">Attendance 68%</span><br><button class="btn" style="width:100%;margin-top:8px;font-size:12px;" onclick="openProfile()">View profile</button></span>
+      <span class="card" style="display:inline-block;min-width:180px;border-color:var(--danger);"><b style="font-size:13px;">Kabir Rao</b><br><span style="font-size:12px;color:var(--text-2);">Chemistry dropped 3 tests</span><br><button class="btn" style="width:100%;margin-top:8px;font-size:12px;" onclick="openProfile()">View profile</button></span>
+    </div>
+    <p class="section-title">Notice board</p>
+    <div class="card" style="padding:0;">
+      <table><tr><td>Unit test on Monday — all batches</td><td style="text-align:right;color:var(--text-3);">Today</td></tr>
+      <tr><td>Institute closed 2 October</td><td style="text-align:right;color:var(--text-3);">Yesterday</td></tr></table>
+    </div>
+    <p class="section-title">Quick actions</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+      <button class="btn" onclick="showView('attendance')">📋 Mark attendance</button>
+      <button class="btn" onclick="showView('addstudent')">➕ Add student</button>
+      <button class="btn" onclick="showView('createtest')">📝 Create test</button>
+      <button class="btn" onclick="showView('fees',document.querySelector('[data-view=fees]'))">🧾 Fees</button>
+    </div>
+  </div>
+
+  <!-- STUDENTS -->
+  <div class="view" id="view-students">
+    <div class="pagehead"><h1>Students</h1><button class="btn primary" onclick="showView('addstudent')">+ Add student</button></div>
+    <div class="search-row"><input placeholder="Search by batch"/><input placeholder="Search by student name"/></div>
+    <div class="card" style="padding:0;overflow-x:auto;">
+      <table>
+        <tr><th>Name</th><th>Batch</th><th>Today</th><th>Attendance</th><th>Trend</th><th>Fees</th><th>Flag</th></tr>
+        <tr class="clickable" onclick="openProfile()"><td>Aarav Shah</td><td>A1</td><td>Present</td><td>82%</td><td>↓ Dropping</td><td><span class="tag good">Paid</span></td><td><span class="tag bad">●</span></td></tr>
+        <tr class="clickable" onclick="openProfile()"><td>Priya Mehta</td><td>C1</td><td>Absent</td><td>68%</td><td>→ Steady</td><td><span class="tag warn">Partial</span></td><td><span class="tag bad">●</span></td></tr>
+        <tr class="clickable" onclick="openProfile()"><td>Kabir Rao</td><td>D3</td><td>Present</td><td>85%</td><td>↓ Dropping</td><td><span class="tag bad">Overdue</span></td><td><span class="tag bad">●</span></td></tr>
+        <tr class="clickable" onclick="openProfile()"><td>Sara Iyer</td><td>B2</td><td>Present</td><td>94%</td><td>↑ Improving</td><td><span class="tag good">Paid</span></td><td>—</td></tr>
+        <tr class="clickable" onclick="openProfile()"><td>Dev Nair</td><td>A1</td><td>Late</td><td>88%</td><td>→ Steady</td><td><span class="tag good">Paid</span></td><td>—</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- STUDENT PROFILE -->
+  <div class="view" id="view-profile">
+    <button class="btn" style="margin-bottom:16px;" onclick="showView('students',document.querySelector('[data-view=students]'))">← Back to students</button>
+    <div class="profile-head">
+      <div class="who"><div class="avatar-lg">AS</div><div><h2>Aarav Shah</h2><p>Batch A1 · Parent: +91 98xxxxxxx0</p></div></div>
+      <div class="profile-actions"><button class="btn">Call parent</button><button class="btn primary">Send report</button></div>
+    </div>
+    <div class="tile-grid">
+      <div class="tile"><p class="num">82%</p><p class="lbl">Overall attendance</p></div>
+      <div class="tile"><p class="num">64%</p><p class="lbl">Overall average</p></div>
+      <div class="tile"><p class="num">Present</p><p class="lbl">Today's status</p></div>
+      <div class="tile"><p class="num">Paid</p><p class="lbl">Fee status</p></div>
+    </div>
+    <div class="card" style="border-color:var(--danger);background:var(--danger-bg);margin-bottom:20px;">
+      <b style="font-size:13px;color:var(--danger);">Flag reason:</b> <span style="font-size:13px;">Physics score dropped 3 tests in a row (71 → 64 → 58)</span>
+    </div>
+    <p class="section-title">Subjects</p>
+    <div class="subject-grid">
+      <div class="card subject-card"><h4>Maths</h4><div class="row"><span>Latest score</span><b>78%</b></div><div class="row"><span>Last 4 scores</span><b>72,75,74,78</b></div><div class="row"><span>vs batch avg</span><b>+6</b></div><div class="row"><span>Attendance</span><b>88%</b></div></div>
+      <div class="card subject-card"><h4>Chemistry</h4><div class="row"><span>Latest score</span><b>69%</b></div><div class="row"><span>Last 4 scores</span><b>74,71,70,69</b></div><div class="row"><span>vs batch avg</span><b>-2</b></div><div class="row"><span>Attendance</span><b>84%</b></div></div>
+      <div class="card subject-card"><h4>Physics</h4><div class="row"><span>Latest score</span><b style="color:var(--danger);">58%</b></div><div class="row"><span>Last 4 scores</span><b>71,64,58,–</b></div><div class="row"><span>vs batch avg</span><b>-16</b></div><div class="row"><span>Attendance</span><b>76%</b></div></div>
+    </div>
+    <p class="section-title">Chapter & topic analysis — Physics</p>
+    <div class="card">
+      <div class="chapter-row"><span>Mechanics <span class="tag good">Good</span></span><span>82% <span class="bar"><span style="width:82%"></span></span></span></div>
+      <div class="chapter-row"><span>Thermodynamics <span class="tag bad">Needs improvement</span></span><span>41% <span class="bar"><span style="width:41%"></span></span></span></div>
+      <div class="chapter-row"><span>&nbsp;&nbsp;↳ First law of thermodynamics</span><span>32% <span class="bar"><span style="width:32%"></span></span></span></div>
+      <div class="chapter-row"><span>Optics <span class="tag warn">Average</span></span><span>58% <span class="bar"><span style="width:58%"></span></span></span></div>
+    </div>
+    <p class="section-title">Fees</p>
+    <div class="card">Paid ₹8,000 of ₹8,000 · Due date 5 Oct · <span class="tag good">Paid</span></div>
+  </div>
+
+  <!-- TESTS -->
+  <div class="view" id="view-tests">
+    <div class="pagehead"><h1>Tests</h1><button class="btn primary" onclick="showView('createtest')">+ Create test</button></div>
+    <div class="card" style="padding:0;overflow-x:auto;">
+      <table>
+        <tr><th>Subject</th><th>Chapter</th><th>Date</th><th>Batch</th><th>Max</th><th>Status</th><th>Avg</th></tr>
+        <tr><td>Physics</td><td>Thermodynamics</td><td>20 Sep</td><td>A1</td><td>50</td><td><span class="tag good">Done</span></td><td>58%</td></tr>
+        <tr><td>Maths</td><td>Calculus</td><td>18 Sep</td><td>All</td><td>100</td><td><span class="tag good">Done</span></td><td>74%</td></tr>
+        <tr><td>Chemistry</td><td>Bonding</td><td>15 Sep</td><td>B2</td><td>50</td><td><span class="tag warn">Marks pending</span></td><td>—</td></tr>
+        <tr><td>Physics</td><td>Optics</td><td>29 Sep</td><td>All</td><td>50</td><td><span class="tag neutral">Upcoming</span></td><td>—</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- CREATE TEST -->
+  <div class="view" id="view-createtest">
+    <button class="btn" style="margin-bottom:16px;" onclick="showView('tests',document.querySelector('[data-view=tests]'))">← Back to tests</button>
+    <h1 style="font-size:21px;font-weight:600;margin:0 0 18px;">Create test</h1>
+    <div class="card">
+      <div class="form-grid">
+        <div><label>Subject</label><select><option>Physics</option><option>Chemistry</option><option>Maths</option></select></div>
+        <div><label>Batch</label><select><option>All batches</option><option>A1</option><option>B2</option></select></div>
+        <div><label>Chapter</label><input placeholder="e.g. Thermodynamics"/></div>
+        <div><label>Date</label><input type="date"/></div>
+        <div><label>Maximum marks</label><input type="number" value="50"/></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:22px;"><input type="checkbox" checked style="width:auto;"/><label style="margin:0;">Post on notice board</label></div>
+      </div>
+    </div>
+    <div class="ai-box">
+      <p style="font-weight:600;font-size:14px;margin:0 0 4px;">✦ Question paper with AI</p>
+      <p style="font-size:12.5px;color:var(--text-2);margin:0 0 14px;">You review every question before it's used.</p>
+      <div class="form-grid">
+        <div><label>Number of questions</label><input type="number" value="10"/></div>
+        <div><label>Type</label><select><option>Mixed</option><option>MCQ</option><option>Short answer</option></select></div>
+        <div><label>Difficulty</label><select><option>Medium</option><option>Easy</option><option>Hard</option></select></div>
+        <div style="display:flex;align-items:flex-end;"><button class="btn primary" style="width:100%;" onclick="document.getElementById('genq').style.display='block'">Generate</button></div>
+      </div>
+      <div id="genq" style="display:none;margin-top:6px;">
+        <div class="qcard"><div class="qtop"><span>Q1 · Thermodynamics · First law</span><span>5 marks</span></div><p class="qtext">State the first law of thermodynamics and explain its significance.</p><div class="qmeta">Type: Short answer · <a href="#">Edit</a> · <a href="#">Remove</a></div></div>
+        <div class="qcard"><div class="qtop"><span>Q2 · Thermodynamics · Heat engines</span><span>5 marks</span></div><p class="qtext">A heat engine operates between 500K and 300K. Calculate its maximum efficiency.</p><div class="qmeta">Type: Numerical · <a href="#">Edit</a> · <a href="#">Remove</a></div></div>
+        <button class="btn" style="margin-top:10px;">+ Add question manually</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:22px;"><button class="btn">Save draft</button><button class="btn primary">Save test</button></div>
+  </div>
+
+  <!-- FEES -->
+  <div class="view" id="view-fees">
+    <h1 style="font-size:21px;font-weight:600;margin:0 0 18px;">Fees</h1>
+    <div class="fee-tiles">
+      <div class="card"><p style="font-size:19px;font-weight:600;margin:0;">₹1,20,000</p><p style="font-size:12.5px;color:var(--text-2);margin:4px 0 0;">Collected this term</p></div>
+      <div class="card"><p style="font-size:19px;font-weight:600;margin:0;color:var(--warn);">₹32,000</p><p style="font-size:12.5px;color:var(--text-2);margin:4px 0 0;">Pending balance</p></div>
+      <div class="card"><p style="font-size:19px;font-weight:600;margin:0;color:var(--danger);">7</p><p style="font-size:12.5px;color:var(--text-2);margin:4px 0 0;">Students overdue</p></div>
+    </div>
+    <div class="card" style="padding:0;overflow-x:auto;">
+      <table>
+        <tr><th>Student</th><th>Batch</th><th>Paid</th><th>Balance</th><th>Due</th><th>Status</th><th></th></tr>
+        <tr><td>Aarav Shah</td><td>A1</td><td>₹8,000</td><td>₹0</td><td>5 Oct</td><td><span class="tag good">Paid</span></td><td><a href="#">Remind</a></td></tr>
+        <tr><td>Priya Mehta</td><td>C1</td><td>₹4,000</td><td>₹4,000</td><td>2 Oct</td><td><span class="tag warn">Partial</span></td><td><a href="#">Remind</a></td></tr>
+        <tr><td>Kabir Rao</td><td>D3</td><td>₹0</td><td>₹8,000</td><td>20 Sep</td><td><span class="tag bad">Overdue</span></td><td><a href="#">Mark paid</a></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ATTENDANCE -->
+  <div class="view" id="view-attendance">
+    <button class="btn" style="margin-bottom:16px;" onclick="showView('overview',document.querySelector('[data-view=overview]'))">← Back</button>
+    <h1 style="font-size:21px;font-weight:600;margin:0 0 6px;">Mark attendance</h1>
+    <p style="font-size:13px;color:var(--text-2);margin:0 0 18px;">Physics · Batch A1 · Today</p>
+    <div class="card" style="padding:0;">
+      <table>
+        <tr><th>Student</th><th>Present</th><th>Late</th><th>Absent</th></tr>
+        <tr><td>Aarav Shah</td><td><input type="radio" name="a1" checked/></td><td><input type="radio" name="a1"/></td><td><input type="radio" name="a1"/></td></tr>
+        <tr><td>Dev Nair</td><td><input type="radio" name="a2" checked/></td><td><input type="radio" name="a2"/></td><td><input type="radio" name="a2"/></td></tr>
+        <tr><td>Sara Iyer</td><td><input type="radio" name="a3"/></td><td><input type="radio" name="a3" checked/></td><td><input type="radio" name="a3"/></td></tr>
+      </table>
+    </div>
+    <button class="btn primary" style="margin-top:16px;">Save attendance</button>
+  </div>
+
+  <!-- ADD STUDENT -->
+  <div class="view" id="view-addstudent">
+    <button class="btn" style="margin-bottom:16px;" onclick="showView('students',document.querySelector('[data-view=students]'))">← Back</button>
+    <h1 style="font-size:21px;font-weight:600;margin:0 0 18px;">Add student</h1>
+    <div class="card">
+      <div class="form-grid">
+        <div><label>Student name</label><input placeholder="Full name"/></div>
+        <div><label>Batch</label><select><option>A1</option><option>B2</option><option>C1</option><option>D3</option></select></div>
+        <div><label>Parent phone</label><input placeholder="98xxxxxxx0"/></div>
+        <div><label>Parent email</label><input placeholder="parent@email.com"/></div>
+      </div>
+    </div>
+    <button class="btn primary" style="margin-top:16px;">Add student</button>
+  </div>
+
+</div>
+
+<script>
+function showView(id, tabEl){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(tabEl) tabEl.classList.add('active');
+}
+function openProfile(){ showView('profile'); }
+
+function switchLoginTab(which){
+  var tI=document.getElementById('tab-institute'), tS=document.getElementById('tab-student');
+  var pI=document.getElementById('panel-institute'), pS=document.getElementById('panel-student');
+  if(which==='institute'){
+    tI.style.background='var(--surface)'; tI.style.color='var(--text)';
+    tS.style.background='transparent'; tS.style.color='var(--text-2)';
+    pI.style.display='block'; pS.style.display='none';
+  } else {
+    tS.style.background='var(--surface)'; tS.style.color='var(--text)';
+    tI.style.background='transparent'; tI.style.color='var(--text-2)';
+    pS.style.display='block'; pI.style.display='none';
+  }
+}
+function doLogin(){
+  var isInst = document.getElementById('panel-institute').style.display !== 'none';
+  if(isInst){
+    var e=document.getElementById('inst-email').value.trim();
+    var p=document.getElementById('inst-pass').value.trim();
+    var err=document.getElementById('inst-error');
+    if(!e || !p){ err.style.display='block'; return; }
+    err.style.display='none';
+  } else {
+    var id=document.getElementById('stu-id').value.trim();
+    var p2=document.getElementById('stu-pass').value.trim();
+    var err2=document.getElementById('stu-error');
+    if(!id || !p2){ err2.style.display='block'; return; }
+    err2.style.display='none';
+  }
+  document.getElementById('navbar').style.display='flex';
+  document.getElementById('wrap').style.maxWidth='960px';
+  showView('overview', document.querySelector('[data-view=overview]'));
+}
+function logout(){
+  document.getElementById('navbar').style.display='none';
+  document.getElementById('wrap').style.maxWidth='380px';
+  showView('login');
+}
+</script>
+
+</body>
+</html>
