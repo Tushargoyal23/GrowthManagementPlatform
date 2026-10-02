@@ -1,0 +1,62 @@
+"use client";
+
+import Link from "next/link";
+import { ClipboardList, FilePlus, Receipt, UserPlus } from "lucide-react";
+import { AttendanceRing } from "@/components/dashboard/AttendanceRing";
+import { FlagList } from "@/components/dashboard/FlagList";
+import { NoticeBoard } from "@/components/dashboard/NoticeBoard";
+import { useTeacherData } from "@/components/layout/TeacherFrame";
+import { buttonClass } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { formatLongDate } from "@/lib/format";
+import { APP_TODAY } from "@/lib/rules";
+
+export default function DashboardPage() {
+  const { students, batchList, notices } = useTeacherData();
+  const attendance =
+    students.length === 0
+      ? 0
+      : Math.round(students.reduce((sum, student) => sum + student.attendancePct, 0) / students.length);
+  const flagged = students.filter((student) => student.flagged);
+
+  return (
+    <div>
+      <p className="m-0 text-[13px] text-text-faint">{formatLongDate(APP_TODAY)}</p>
+      <h1 className="m-0 mt-1 text-[22px] font-semibold">Good morning, Rohan</h1>
+      <p className="mb-5 mt-2 max-w-[620px] text-[14.5px] leading-relaxed text-text-muted">
+        <b className="text-text">{attendance}% attendance</b> across <b className="text-text">{batchList.length} batches</b>.
+      </p>
+      <Card className="mb-5 grid items-center gap-4 sm:grid-cols-[120px_1fr]">
+        <AttendanceRing percent={attendance} />
+        <div className="grid grid-cols-2 gap-2.5">
+          <div>
+            <p className="m-0 text-[19px] font-semibold">{batchList.length}</p>
+            <p className="m-0 mt-0.5 text-xs text-text-muted">batches</p>
+          </div>
+          <div>
+            <p className="m-0 text-[19px] font-semibold">{students.length}</p>
+            <p className="m-0 mt-0.5 text-xs text-text-muted">students</p>
+          </div>
+        </div>
+      </Card>
+      <FlagList students={flagged} />
+      <h2 className="mb-3 mt-6 text-sm font-semibold">Notice board</h2>
+      <NoticeBoard notices={notices} />
+      <h2 className="mb-3 mt-6 text-sm font-semibold">Quick actions</h2>
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        <Link href="/dashboard/attendance" className={buttonClass()}>
+          <ClipboardList size={14} className="mr-1.5" /> Mark attendance
+        </Link>
+        <Link href="/dashboard/students/new" className={buttonClass()}>
+          <UserPlus size={14} className="mr-1.5" /> Add student
+        </Link>
+        <Link href="/dashboard/tests/create" className={buttonClass()}>
+          <FilePlus size={14} className="mr-1.5" /> Create test
+        </Link>
+        <Link href="/dashboard/fees" className={buttonClass()}>
+          <Receipt size={14} className="mr-1.5" /> Fees
+        </Link>
+      </div>
+    </div>
+  );
+}
