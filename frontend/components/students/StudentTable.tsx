@@ -33,10 +33,10 @@ const ZONE_LOOK = {
 
 export function StudentTable({
   students,
-  records,
+  records = [],
 }: {
   students: Student[];
-  records: StudentRecord[];
+  records?: StudentRecord[];
 }) {
   const router = useRouter();
   const [batchQuery, setBatchQuery] = useState("");
@@ -47,7 +47,8 @@ export function StudentTable({
   );
 
   const rows = students.filter((student) => {
-    const batch = student.batchId.toLowerCase().includes(batchQuery.trim().toLowerCase());
+    const batchLabel = (student.batchName || student.batchId).toLowerCase();
+    const batch = batchLabel.includes(batchQuery.trim().toLowerCase());
     const name = student.name.toLowerCase().includes(nameQuery.trim().toLowerCase());
     return batch && name;
   });
@@ -79,7 +80,7 @@ export function StudentTable({
               onClick={() => router.push(`/dashboard/students/${student.id}`)}
             >
               <Td>{student.name}</Td>
-              <Td>{student.batchId}</Td>
+              <Td>{student.batchName || student.batchId}</Td>
               <Td>{student.today ?? "—"}</Td>
               <Td>{student.attendancePct === null ? "—" : `${student.attendancePct}%`}</Td>
               <Td>{studentTrend ? TREND_LABEL[studentTrend] : "—"}</Td>

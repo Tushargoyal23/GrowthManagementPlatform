@@ -47,7 +47,7 @@ export function flagReason(attendancePct: number, subjects: SubjectScore[]): str
     );
   }
 
-  if (attendancePct < ATTENDANCE_FLAG_BELOW) {
+  if (attendancePct <= ATTENDANCE_FLAG_BELOW) {
     reasons.push(`Attendance ${attendancePct}%`);
   }
 

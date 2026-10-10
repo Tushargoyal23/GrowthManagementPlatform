@@ -75,19 +75,19 @@ export default function StudentProfilePage() {
         </div>
       )}
       <h2 className="mb-3 mt-6 text-sm font-semibold">Subjects</h2>
-      {subjectScores.length === 0 ? (
+      {subjects.length === 0 ? (
         <p className="text-[13px] text-text-muted">No subject scores yet.</p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-3">
-          {subjectScores.map((score) => (
+          {subjects.map((score) => (
             <SubjectCard key={score.subject} score={score} />
           ))}
         </div>
       )}
-      {chapterList.length > 0 && subjectName && (
+      {chapters.length > 0 && subjectName && (
         <>
           <h2 className="mb-3 mt-6 text-sm font-semibold">Chapter & topic analysis — {subjectName}</h2>
-          <ChapterTopicList chapters={chapterList} />
+          <ChapterTopicList chapters={chapters} />
         </>
       )}
       <h2 className="mb-3 mt-6 text-sm font-semibold">Fees</h2>
